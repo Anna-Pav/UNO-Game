@@ -41,3 +41,16 @@ class Game:
                 print(f"  Player {i + 1}'s Hand: {hand_str}")
 
             print()  # Blank line for better readability
+
+    # function to flip first card
+    def flip_first_card(self):
+         while True:
+            # flip the first card
+            first_card = self.deck.cards[0]
+            # if it's action or wid card, flip the next one
+            if first_card.color == "wild" or first_card.value in ["reverse", "draw", "skip"]:
+                print(f"Illegal move, flip again: {first_card}")
+                self.deck.cards.pop(0)
+            else:
+                print(f"Flipping first card: {first_card}")
+                break

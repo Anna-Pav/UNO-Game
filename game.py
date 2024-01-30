@@ -54,36 +54,41 @@ class Game:
     def play_card(self, player_num):
         player_hand = self.players_hand[player_num]
 
-        print(f"Player {player_num + 1}'s Hand:")
-
-        #access and print current player's hand
-        for index, card in enumerate(player_hand, start=1):
-            card_str = str(card)
-            print(f"Card {index}: {card_str}")
-
         #Player input
         while True: 
+
+            print(f"Player {player_num + 1}'s Hand:")
+
+            #access and print current player's hand
+            for index, card in enumerate(player_hand, start=1):
+                card_str = str(card)
+                print(f"Card {index}: {card_str}")
+
             try:
                 players_input = int(input(f"Choose your card, Player {player_num + 1} (1-{len(player_hand)}): "))
+                
+                #played_card = player_hand.pop(played_card_index)
 
                 if players_input >= 1 and players_input <= len(player_hand):
-                    played_card_index = players_input-1
+                        played_card = player_hand[players_input - 1]
 
-                    # remove the played card from players current hand
-                    played_card = player_hand.pop(played_card_index)
-
-                    #check played card is valid
-                    if played_card.value == self.first_card.value or played_card.color == self.first_card.color: 
-                        print(f"You played: {played_card}")
-                        print(f"remaining cards: {len(player_hand)}")
-                    else: 
-                        print("card needs to match color or number")
-
-                    break
+                        #check played card is valid
+                        if played_card.value == self.first_card.value or played_card.color == self.first_card.color: 
+                            print(f"You played: {played_card}")
+                            #remove the played card from players current hand
+                            player_hand.pop(players_input - 1)
+                            print(f"remaining cards: {len(player_hand)}")
+                            #exti loop after valid card is played
+                            break
+                            
+                        else: 
+                            print("card needs to match color or number")
                 else:
-                    print(f"Please enter a number between: (1-{len(player_hand)}")
+                        print(f"Please enter a number between: (1-{len(player_hand)}")
             except ValueError:
                     print("Invalid input")
+
+
 
                 
 

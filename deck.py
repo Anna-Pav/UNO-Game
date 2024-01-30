@@ -23,15 +23,15 @@ class Deck:
                 card = Card(color, str(number))
                 #if number is zero add one of each colour. But for the numbers 1-9 add them twice for each colour.
                 if number == 0:
-                    self.cards.append(Card(color, str(number)))
+                    self.cards.append(card)
                 else:
                     self.cards.append(card)
                     self.cards.append(card)
                 number += 1
              # Action cards - each action card is represented twice for each colour 
             for action_card in action_cards:
-                self.cards.append(Card(color, action_card))
-                self.cards.append(Card(color, action_card))
+                self.cards.append(card)
+                self.cards.append(card)
 
         # Wild cards
         for i in range(4):

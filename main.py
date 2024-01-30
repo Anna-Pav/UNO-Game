@@ -1,7 +1,8 @@
 from game import Game
 
 if __name__ == "__main__":
-    game = Game(4)
-    game.deal_all_cards(7)
+    num_players = 4  # Set the number of players
+    game = Game(num_players)
+    game.deal_all_cards()
     game.flip_first_card()
- 
+    game.play_card(0)

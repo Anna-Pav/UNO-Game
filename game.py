@@ -10,6 +10,9 @@ class Game:
         #Shuffle the cards
         random.shuffle(self.deck.cards)
 
+        #flag to indicate when a player loses their turn
+        self.skip_turn = False
+
     # Function to deal one card to each player
     def deal_single_cards(self):
 
@@ -65,30 +68,66 @@ class Game:
                 print(f"Card {index}: {card_str}")
 
             try:
+                print("------------------------------------------")
                 players_input = int(input(f"Choose your card, Player {player_num + 1} (1-{len(player_hand)}): "))
-                
-                #played_card = player_hand.pop(played_card_index)
 
                 if players_input >= 1 and players_input <= len(player_hand):
                         played_card = player_hand[players_input - 1]
 
                         #check played card is valid
-                        if played_card.value == self.first_card.value or played_card.color == self.first_card.color: 
+                        if played_card.value == self.first_card.value or played_card.color == self.first_card.color or played_card.color == "wild": 
                             print(f"You played: {played_card}")
                             #remove the played card from players current hand
                             player_hand.pop(players_input - 1)
+
                             print(f"remaining cards: {len(player_hand)}")
-                            #exti loop after valid card is played
+                            
+                            # first card now is the chosen valid card
+                            self.first_card = played_card
+                            print(f"new card facing up: {self.first_card}")
+
+                            # enter logic for wild draw 4
+                            if played_card.value == "Draw 4":
+                                #remove 4 from deck
+                                 for i in range(4):
+                                    if len(self.deck.cards) > 0:
+                                        card = self.deck.cards.pop()
+                                        # add 4 to next players hand
+                                        # the modulo creates a circular indexing ensuring the transition from the last player back to the first one
+                                        self.players_hand[(player_num+1)% self.num_players].append(card)
+                                    # player who draws 4 cards loses thier turn
+                                    self.skip_turn = True
+                            #implement logic after draw 4 the game skips to the next player
+
+                            #exit loop after valid card is played
                             break
                             
                         else: 
                             print("card needs to match color or number")
+                            print("------------------------------------")
                 else:
                         print(f"Please enter a number between: (1-{len(player_hand)}")
             except ValueError:
                     print("Invalid input")
 
+    def start_game(self):
 
+        self.deal_all_cards()
+        self.flip_first_card()
+
+        # players playing in turns
+        while len(self.players_hand) > 0:
+            for player_num in range(self.num_players):
+                if self.skip_turn:
+                    print(f"Player {player_num + 1}'s turn is skipped.")
+                    # reset the flag for the next turn
+                    self.skip_turn = False
+                    # skip the rest of the loop and move to the next player
+                    continue 
+                    
+                self.play_card(player_num)
+        else: 
+            print("game over")
 
                 
 

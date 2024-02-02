@@ -3,6 +3,8 @@ from card import Card
 
 class Deck:
 
+    colors = ["blue", "green","red", "yellow"]
+
     def __init__(self):
         self.cards = []
         self.createDeck()
@@ -10,12 +12,12 @@ class Deck:
     # Function to create the deck
     def createDeck(self):
 
-        colors = ["blue", "green","red", "yellow"]
+        
         action_cards = ["reverse", "draw", "skip"]
 
         #Iterates four times, one for each color
         for i in range(4):
-            color = colors[i] # get color name
+            color = self.colors[i] # get color name
             number = 0
 
             # Iterates ten times, creating cards with numbers 0 to 9 for each color

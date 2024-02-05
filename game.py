@@ -38,7 +38,7 @@ class Game:
         player_hand = self.players_hand[player_num]
 
         while True:
-            print(f"Player {player_num + 1}'s turn. Current card: {self.first_card}")
+            print(f"Player {player_num + 1}'s turn. Current card: {self.first_card} with color {self.current_color}")
             for index, card in enumerate(player_hand, start=1):
                 print(f"Card {index}: {card}")
             try:
@@ -48,9 +48,8 @@ class Game:
                         card = self.deck.cards.pop()
                         player_hand.append(card)
                         print(f"Player {player_num + 1} draws a card: {card}")
-                        for index, card in enumerate(player_hand, start=1):
-                            print(f"Card {index}: {card}")
-                        if card.color == "wild" or card.color == self.current_color or card.value == self.first_card.value:
+                        if card.color == self.current_color or card.value == self.first_card.value or card.color == "wild":
+                            print("You drew a playable card! You can choose to play this card now.")
                             continue  # Allow the player to choose to play the drawn card
                         else:
                             print("Drawn card cannot be played. Turn ends.")
@@ -60,17 +59,15 @@ class Game:
                         return
                 elif 1 <= card_choice <= len(player_hand):
                     played_card = player_hand[card_choice - 1]
-                    if played_card.color == self.first_card.color or played_card.value == self.first_card.value or played_card.color == "wild":
+                    if played_card.color == self.current_color or played_card.value == self.first_card.value or played_card.color == "wild":
                         if played_card.color == "wild":
-                            while True:
+                            chosen_color = input("Choose a color for the next play (Red, Blue, Green, Yellow): ").lower()
+                            while chosen_color not in ["red", "blue", "green", "yellow"]:
+                                print("Invalid color. Please choose Red, Blue, Green, or Yellow.")
                                 chosen_color = input("Choose a color for the next play (Red, Blue, Green, Yellow): ").lower()
-                                if chosen_color in ["red", "blue", "green", "yellow"]:
-                                    self.current_color = chosen_color
-                                    print(f"Next color is {self.current_color}")
-                                    self.first_card = Card(chosen_color, "Any")  # Update the first card to reflect the chosen color
-                                    break
-                                else:
-                                    print("Invalid color. Please choose Red, Blue, Green, or Yellow.")
+                            self.current_color = chosen_color
+                            print(f"Next color is {self.current_color}")
+                            self.first_card = Card(chosen_color, "Any")  # Use "Any" to indicate any value is acceptable since the color has been changed.
 
                         if played_card.value == "Draw 4":
                             print("Wild Draw 4 played. Next player draws 4 cards and loses their turn.")
@@ -78,14 +75,18 @@ class Game:
                                 if len(self.deck.cards) > 0:
                                     self.players_hand[(player_num + 1) % self.num_players].append(self.deck.cards.pop())
                             self.skip_turn = True
-                            break
+                            self.first_card = Card(self.current_color, "Any")  # Reset the first card to be a dummy wild card with the chosen color
 
                         if played_card.color != "wild":
-                            self.current_color = played_card.color  # Update the current color to that of the played card
+                            self.current_color = played_card.color
+                            self.first_card = played_card  # Update the first_card to the played card
 
-                        self.first_card = played_card  # Update the first_card to the played card
-                        player_hand.remove(played_card)
+                        player_hand.pop(card_choice - 1)  # Remove the played card from the player's hand
                         print(f"Player {player_num + 1} played: {played_card}")
+
+                        if not player_hand:
+                            print(f"Player {player_num + 1} has won the game by playing their last card!")
+                            return "Game Over"
                         break
                     else:
                         print("Invalid card selection. Card does not match current color or value.")
@@ -93,11 +94,6 @@ class Game:
                     print("Invalid selection. Please select a valid card number.")
             except ValueError:
                 print("Invalid input. Please enter a number.")
-
-
-
-
-
 
     def start_game(self):
         self.deal_all_cards()

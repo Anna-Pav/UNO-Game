@@ -12,7 +12,6 @@ class Deck:
     # Function to create the deck
     def createDeck(self):
 
-        
         action_cards = ["reverse", "draw", "skip"]
 
         #Iterates four times, one for each color
@@ -31,7 +30,8 @@ class Deck:
                     self.cards.append(card)
                 number += 1
              # Action cards - each action card is represented twice for each colour 
-            for action_card in action_cards:
+            for i in range(3):
+                card = Card(color, str(action_cards[i]))
                 self.cards.append(card)
                 self.cards.append(card)
 
@@ -39,3 +39,7 @@ class Deck:
         for i in range(4):
             self.cards.append(Card("wild", ""))
             self.cards.append(Card("wild", "Draw 4"))
+    
+    def printDeck(self):
+        for card in self.cards:
+            print (card)

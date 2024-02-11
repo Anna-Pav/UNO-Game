@@ -93,6 +93,11 @@ class Game:
                                     print("Deck is empty. Cannot draw more cards.")
                             self.skip_turn = True  # Skip next player's turn
 
+                        # handle skip card
+                        if played_card.value == "skip":
+                            print(f"Skip card played. Next player loses their turn.")
+                            self.skip_turn = True
+
                         if played_card.color != "wild":
                             self.current_color = played_card.color
                             self.first_card = played_card  # Update the first_card to the played card

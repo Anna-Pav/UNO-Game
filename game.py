@@ -11,6 +11,12 @@ class Game:
         random.shuffle(self.deck.cards)  # Shuffle the cards
         self.current_color = None  # Current color, important for gameplay after a wild card
         self.skip_turn = False  # Flag to indicate when a player's turn is skipped
+        self.direction = 1 # direction of play - 1:clockwise, -1=anticlockwise 
+
+    # method to find out who the next player is after a card is played or a turn is skipped
+    def get_next_player(self, current_player):
+        next_player = (current_player + self.direction) % self.num_players
+        return next_player
 
     def deal_single_cards(self):
         for player_index in range(self.num_players):
@@ -98,6 +104,10 @@ class Game:
                             print(f"Skip card played. Next player loses their turn.")
                             self.skip_turn = True
 
+                        if played_card.value == "reverse":
+                            print("Reverse card played. Direction of game changed!")
+                            self.direction *= -1 #multiply current direction by -1 to change it
+
                         if played_card.color != "wild":
                             self.current_color = played_card.color
                             self.first_card = played_card  # Update the first_card to the played card
@@ -106,7 +116,7 @@ class Game:
                         print(f"Player {player_num + 1} played: {played_card}")
 
                         if not player_hand:
-                            print(f"Player {player_num + 1} has won the game by playing their last card!")
+                            print(f"Player {player_num + 1} has played their last card!")
                             return "Game Over"
                         break
                     else:
@@ -120,16 +130,19 @@ class Game:
         self.deal_all_cards()
         self.flip_first_card()
 
+        player_num = 0  # Start with the first player
         while any(self.players_hand):  # Continue until one player runs out of cards
-            for player_num in range(self.num_players):
-                if self.skip_turn:
-                    print(f"Player {player_num + 1}'s turn is skipped.")
-                    self.skip_turn = False
-                    continue
+            if self.skip_turn:
+                print(f"Player {player_num + 1}'s turn is skipped.")
+                self.skip_turn = False
+            else:
                 self.play_card(player_num)
                 if not self.players_hand[player_num]:  # Check if the current player has won
                     print(f"Player {player_num + 1} has won the game!")
-                    return  # End the game
+                    break  # End the game
 
-    print("Game over.")
+            # Move to the next player considering the direction, skipping is handled within play_card
+            player_num = self.get_next_player(player_num)
+
+        print("Game over.")
 

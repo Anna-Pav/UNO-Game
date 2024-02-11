@@ -24,13 +24,14 @@ class Game:
 
     def flip_first_card(self):
         while True:
-            first_card = self.deck.cards.pop(0)
-            if first_card.color != "wild":
+            first_card = self.deck.cards.pop(0) #draw facing card
+            if first_card.color != "wild" and first_card.value.isdigit():
                 self.current_color = first_card.color
                 self.first_card = first_card
                 print(f"First card: {self.first_card}")
                 break
             else:
+                # Invlaid card goes at the bottom of the deck and deck gets reshuffled 
                 self.deck.cards.append(first_card)
                 random.shuffle(self.deck.cards)
 
@@ -42,8 +43,10 @@ class Game:
             for index, card in enumerate(player_hand, start=1):
                 print(f"Card {index}: {card}")
             try:
-                card_choice = int(input("Choose a card to play (or 0 to draw a card): "))
-                if card_choice == 0:
+                card_choice = int(input("Choose a card to play (or 0 to draw a card): ")) 
+
+                #handle player's choice to draw a card
+                if card_choice == 0:            
                     if len(self.deck.cards) > 0:
                         card = self.deck.cards.pop()
                         player_hand.append(card)
@@ -60,6 +63,7 @@ class Game:
                 elif 1 <= card_choice <= len(player_hand):
                     played_card = player_hand[card_choice - 1]
                     if played_card.color == self.current_color or played_card.value == self.first_card.value or played_card.color == "wild":
+                        # handle wild card logic
                         if played_card.color == "wild":
                             chosen_color = input("Choose a color for the next play (Red, Blue, Green, Yellow): ").lower()
                             while chosen_color not in ["red", "blue", "green", "yellow"]:
@@ -69,6 +73,7 @@ class Game:
                             print(f"Next color is {self.current_color}")
                             self.first_card = Card(chosen_color, "Any")  # Use "Any" to indicate any value is acceptable since the color has been changed.
 
+                        # wild card draw 4 logic
                         if played_card.value == "Draw 4":
                             print("Wild Draw 4 played. Next player draws 4 cards and loses their turn.")
                             for _ in range(4):
@@ -76,6 +81,17 @@ class Game:
                                     self.players_hand[(player_num + 1) % self.num_players].append(self.deck.cards.pop())
                             self.skip_turn = True
                             self.first_card = Card(self.current_color, "Any")  # Reset the first card to be a dummy wild card with the chosen color
+
+                        # Handle "Draw Two" card
+                        if played_card.value == "draw":
+                            print(f"'Draw Two' card played. Next player must draw 2 cards and miss their turn.")
+                            next_player = (player_num + 1) % self.num_players
+                            for _ in range(2):
+                                if len(self.deck.cards) > 0:
+                                    self.players_hand[next_player].append(self.deck.cards.pop())
+                                else:
+                                    print("Deck is empty. Cannot draw more cards.")
+                            self.skip_turn = True  # Skip next player's turn
 
                         if played_card.color != "wild":
                             self.current_color = played_card.color

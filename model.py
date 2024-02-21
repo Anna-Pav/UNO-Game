@@ -52,7 +52,7 @@ class QTrainer:
 
         target = pred.clone()
         for idx in range(done.size(0)):  # Iterate over batch
-            Q_new = reward[idx]
+            Q_new = reward[idx] if reward.dim() > 0 else reward  # Handle reward as scalar if it's 0-dim
             if not done[idx]:
                 Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
 

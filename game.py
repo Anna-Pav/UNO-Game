@@ -228,6 +228,8 @@ class Game:
 
 
     def get_state(self, player_num):
+        if self.first_card is None:
+            raise ValueError("Game state requested before first card was flipped. Ensure game setup is complete.")
         # Assuming player_num is the index for the AI agent
         agent_hand = self.players_hand[player_num]
         state = {

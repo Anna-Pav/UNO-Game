@@ -1,5 +1,7 @@
 from game import Game
 from agent import Agent  # Ensure you have an Agent class that implements the AI logic
+from actions import play_matching_color, play_matching_number, play_wild_card, pick_card_from_deck
+
 
 if __name__ == "__main__":
     num_players = 4  # Including the AI agent
@@ -21,6 +23,17 @@ if __name__ == "__main__":
             # It's the agent's turn
             state = game.get_state(agent_player_num)  # Get the current state for the agent
             action = agent.decide_action(game_state, agent_hand, deck)  # Agent decides on an action
+
+            # Map the action to game actions
+            if action == 0:
+                action = play_matching_color(agent_hand, game_state['current_color'])  # Assuming game_state[0] is current color
+            elif action == 1:
+                action =  play_matching_number(agent_hand, game_state['current_value'])  # Assuming game_state[1] is current number
+            elif action == 2:
+                action =  play_wild_card(agent_hand)
+            elif action == 3:
+                action =  pick_card_from_deck(deck)
+        
             card = action  # Assuming 'action' directly corresponds to a card object; adjust as needed
 
             # Execute the action and update the game state

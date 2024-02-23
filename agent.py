@@ -21,7 +21,7 @@ class Agent:
         self.epsilon = 0 # randomness
         self.gamma = 0.9 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY) # popleft()
-        self.model = Linear_QNet(11, 256, 4)
+        self.model = Linear_QNet(11, 256, 11)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
         self.game = None
@@ -42,6 +42,11 @@ class Agent:
             mini_sample = self.memory
 
         states, actions, rewards, next_states, game_overs = zip(*mini_sample)
+
+         # Convert states and next_states using convert_game_state_to_tensor
+        states = [self.convert_game_state_to_tensor(state) for state in states]
+        next_states = [self.convert_game_state_to_tensor(state) for state in next_states]
+
         self.trainer.train_step(states, actions, rewards, next_states, game_overs)
 
     def train_short_memory(self, state, action, reward, next_state, game_over):
@@ -122,17 +127,7 @@ class Agent:
         
         # Use the model to get the action probabilities
         action_probs = self.model(state_tensor)
-        action = torch.argmax(action_probs).item()
-
-        # Map the action to game actions
-        if action == 0:
-            return play_matching_color(agent_hand, game_state['current_color'])  # Assuming game_state[0] is current color
-        elif action == 1:
-            return play_matching_number(agent_hand, game_state['current_value'])  # Assuming game_state[1] is current number
-        elif action == 2:
-            return play_wild_card(agent_hand)
-        elif action == 3:
-            return pick_card_from_deck(deck)
+        return torch.argmax(action_probs).item()
 
     def train(self):
         if len(self.memory) < BATCH_SIZE:
@@ -183,6 +178,11 @@ class Agent:
         return hand_encoding
 
     def convert_game_state_to_tensor(self, game_state):
+        if game_state is None:
+        # Handle the case where game_state is None
+        # You might want to return a default tensor or handle this case before calling the function
+          return torch.zeros([1, 11]) 
+        
         # Initialize encodings
         current_color_encoding = [0] * 4  # One hot encoding for 4 colors
         current_value_encoding = [0] * 4  # One hot encoding for categories: number, skip, reverse, draw/draw4

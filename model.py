@@ -45,13 +45,11 @@ class QTrainer:
         pred = self.model(state)
 
         target = pred.clone()
-        for idx in range(done.size(0)):  # Iterate over batch
-            Q_new = reward[idx].item() if reward.dim() > 0 else reward.item()
+        for idx in range(done.size(0)):
+            Q_new = reward[idx].item()
             if not done[idx]:
-                Q_new += self.gamma * torch.max(self.model(next_state[idx]))
-
-            # Directly use action index since action is already determined by decide_action
-            action_idx = action[idx] if action.dim() > 1 else action
+                Q_new += self.gamma * torch.max(self.model(next_state[idx]).detach())
+            action_idx = action[idx].item()  # Ensure action_idx is a scalar
             target[idx][action_idx] = Q_new
 
         self.optimizer.zero_grad()

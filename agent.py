@@ -21,7 +21,7 @@ class Agent:
         self.epsilon = 0 # randomness
         self.gamma = 0.9 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY) # popleft()
-        self.model = Linear_QNet(11, 256, 11)
+        self.model = Linear_QNet(11, 256, 4)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
         self.game = None
@@ -67,10 +67,10 @@ class Agent:
                 return 0
             elif action.value.isdigit():
                 # Assign integers based on the card's numeric value
-                return int(action.value) + 1  # +1 to differentiate from wild cards
+                return 1  # +1 to differentiate from wild cards
             else:
                 # Assign integers for action cards (skip, reverse, draw)
-                action_map = {'skip': 11, 'reverse': 12, 'draw': 13, 'Draw 4': 14}
+                action_map = {'skip': 0, 'reverse': 1, 'draw': 2, 'Draw 4': 3}
                 return action_map.get(action.value, -1)  # Default to -1 if action is not recognized
         else:
             # If action is not a Card object, handle accordingly

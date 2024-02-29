@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 import os
+import numpy as np
 
 class Linear_QNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -35,7 +36,7 @@ class QTrainer:
     def train_step(self, state, action, reward, next_state, done):
 
         # Convert single instances to tensors and add a batch dimension
-        state = torch.tensor(state, dtype=torch.float).unsqueeze(0) if not isinstance(state, torch.Tensor) else state
+        state = torch.tensor(np.array(state, dtype=int), dtype=torch.float).unsqueeze(0) if not isinstance(state, torch.Tensor) else state
         action = torch.tensor([action], dtype=torch.long) if not isinstance(action, torch.Tensor) else action
         reward = torch.tensor([reward], dtype=torch.float) if not isinstance(reward, torch.Tensor) else reward
         next_state = torch.tensor(next_state, dtype=torch.float).unsqueeze(0) if not isinstance(next_state, torch.Tensor) else next_state

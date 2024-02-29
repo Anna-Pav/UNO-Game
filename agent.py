@@ -16,12 +16,47 @@ class Agent:
     color_map = {'red': 0, 'blue': 1, 'green': 2, 'yellow': 3, 'wild': 4}
     value_map = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'skip': 10, 'reverse': 11, 'draw': 12, 'Draw 4': 13}
     
+    # Define the action mapping as a class attribute
+    action_mapping = {}
+    action_id = 0  # Start with 0 and increment for each unique card
+
+    for color in ["blue", "green", "red", "yellow"]:
+        # Number cards
+        for number in range(10):  # 0-9
+            action_mapping[f"{color}_{number}"] = action_id
+            action_id += 1
+            if number != 0:  # Number cards 1-9 appear twice
+                action_mapping[f"{color}_{number}"] = action_id
+                
+
+        # Action cards
+        for action in ["reverse", "draw", "skip"]:
+            action_mapping[f"{color}_{action}"] = action_id
+            action_id += 1
+            # Each action card appears twice per color
+            action_mapping[f"{color}_{action}"] = action_id
+            action_id += 1
+
+    # Wild cards
+    for wild_card in ["wild", "wild_Draw 4"]:
+        action_mapping[wild_card] = action_id
+        action_id += 1
+        # Each wild card appears four times
+        action_mapping[wild_card] = action_id
+        action_id += 1
+        action_mapping[wild_card] = action_id
+        action_id += 1
+        action_mapping[wild_card] = action_id
+        action_id += 1
+
+    total_actions = action_id  # Total number of unique actions
+
     def __init__(self,game,number_of_games=1000):
         self.n_games = 0
         self.epsilon = 0 # randomness
         self.gamma = 0.9 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY) # popleft()
-        self.model = Linear_QNet(11, 256, 4)
+        self.model = Linear_QNet(11, 256, self.total_actions)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
         self.game = None
@@ -37,17 +72,16 @@ class Agent:
 
     def train_long_memory(self):
         if len(self.memory) > BATCH_SIZE:
-            mini_sample = random.sample(self.memory, BATCH_SIZE) # list of tuples
+            mini_sample = random.sample(self.memory, BATCH_SIZE)  # list of tuples
         else:
             mini_sample = self.memory
 
-        states, actions, rewards, next_states, game_overs = zip(*mini_sample)
-
-         # Convert states and next_states using convert_game_state_to_tensor
-        states = [self.convert_game_state_to_tensor(state) for state in states]
-        next_states = [self.convert_game_state_to_tensor(state) for state in next_states]
-
-        self.trainer.train_step(states, actions, rewards, next_states, game_overs)
+        for sample in mini_sample:
+            state, action, reward, next_state, game_over = sample
+            state_tensor = self.convert_game_state_to_tensor(state)
+            next_state_tensor = self.convert_game_state_to_tensor(next_state)
+            action_int = self.encode_action(action)
+            self.trainer.train_step(state_tensor, action_int, reward, next_state_tensor, game_over)
 
     def train_short_memory(self, state, action, reward, next_state, game_over):
         # Convert state and next_state to tensors
@@ -59,25 +93,28 @@ class Agent:
         # Pass tensors and encoded action to train_step
         self.trainer.train_step(state_tensor, action_int, reward, next_state_tensor, game_over)
 
+    
+
     def encode_action(self, action):
-        # Assuming 'action' is a Card object and your action space is defined by the card's properties
+        # Ensure 'action' is a Card object
         if isinstance(action, Card):
+            # Handle wild cards separately since they don't have a color
             if action.color == "wild":
-                # Assign a specific integer for wild cards
-                return 0
-            elif action.value.isdigit():
-                # Assign integers based on the card's numeric value
-                return 1  # +1 to differentiate from wild cards
+                card_key = action.value  # For wild cards, use just the value as the key
             else:
-                # Assign integers for action cards (skip, reverse, draw)
-                action_map = {'skip': 0, 'reverse': 1, 'draw': 2, 'Draw 4': 3}
-                return action_map.get(action.value, -1)  # Default to -1 if action is not recognized
+                # For regular cards, use both color and value to form the key
+                card_key = f"{action.color}_{action.value}"
+
+            # Use the action mapping to convert the card key to an integer
+            encoded_action = self.action_mapping.get(card_key, -1)  # Default to -1 if the card is not recognized
+
+            return encoded_action
         else:
             # If action is not a Card object, handle accordingly
             return -1  # Placeholder for unrecognized actions
-
+    
     def get_action(self, state, agent_hand, current_color, current_number, deck, player_num):
-            action_size = 4  # We have four possible actions
+            action_size = self.total_actions  # Use the total number of actions instead of hardcoding
             choice = None
 
             # Adjust epsilon based on the number of games played (decay)

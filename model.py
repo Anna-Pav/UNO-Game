@@ -35,27 +35,38 @@ class QTrainer:
 
     def train_step(self, state, action, reward, next_state, done):
 
-        # Convert single instances to tensors and add a batch dimension
-        state = torch.tensor(np.array(state, dtype=int), dtype=torch.float).unsqueeze(0) if not isinstance(state, torch.Tensor) else state
-        action = torch.tensor([action], dtype=torch.long) if not isinstance(action, torch.Tensor) else action
-        reward = torch.tensor([reward], dtype=torch.float) if not isinstance(reward, torch.Tensor) else reward
+        # Ensure that state and next_state are tensors with the required shape
+        state = torch.tensor(state, dtype=torch.float).unsqueeze(0) if not isinstance(state, torch.Tensor) else state
         next_state = torch.tensor(next_state, dtype=torch.float).unsqueeze(0) if not isinstance(next_state, torch.Tensor) else next_state
-        done = torch.tensor([done], dtype=torch.bool) if not isinstance(done, torch.Tensor) else done
 
-        # Predicted Q values with current state
+        # Ensure action and reward are wrapped in tensors
+        action = torch.tensor([action], dtype=torch.long)
+        reward = torch.tensor([reward], dtype=torch.float)
+
+        # Predict Q values for the current state
         pred = self.model(state)
 
+        # Clone the predictions to use as the target
         target = pred.clone()
-        for idx in range(done.size(0)):
-            Q_new = reward[idx].item()
-            if not done[idx]:
-                Q_new += self.gamma * torch.max(self.model(next_state[idx]).detach())
-            action_idx = action[idx].item()  # Ensure action_idx is a scalar
-            target[idx][action_idx] = Q_new
 
+        # Compute the new Q value
+        Q_new = reward.item()
+        if not done:
+            Q_new += self.gamma * torch.max(self.model(next_state).detach())
+
+        # Update the target for the action taken
+        target[0][action] = Q_new
+
+        # Zero the gradients
         self.optimizer.zero_grad()
+
+        # Calculate the loss
         loss = self.criterion(target, pred)
+
+        # Backpropagate the loss
         loss.backward()
+
+        # Update the weights
         self.optimizer.step()
 
 

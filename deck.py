@@ -9,7 +9,7 @@ class Deck:
         self.cards = []
         self.createDeck()
 
-        random.seed(10)  # Setting the seed for repeatability
+        #random.seed(10)  # Setting the seed for repeatability
         random.shuffle(self.cards)  # Shuffle the cards
 
     # Function to create the deck

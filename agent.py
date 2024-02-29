@@ -28,7 +28,6 @@ class Agent:
             if number != 0:  # Number cards 1-9 appear twice
                 action_mapping[f"{color}_{number}"] = action_id
                 
-
         # Action cards
         for action in ["reverse", "draw", "skip"]:
             action_mapping[f"{color}_{action}"] = action_id
@@ -65,7 +64,20 @@ class Agent:
         self.number_wins = 0
         self.number_loses = 0
 
+        #metrics
+        self.win_count = 0
+        self.wins_over_time = []  # List to store the win count over time
+        self.rewards_over_time = []  # List to store rewards over time
+
         self.game = game
+    
+    # Update these lists in your training loop or after each game
+    def update_metrics(self, reward, game_over):
+        if game_over:
+            self.wins_over_time.append(self.win_count)
+            self.rewards_over_time.append(reward)
+            if reward > 0:  # Assuming a positive reward indicates a win
+                self.win_count += 1
 
     def remember(self, state, action, reward, next_state, game_over):
         self.memory.append((state, action, reward, next_state, game_over))
@@ -92,8 +104,6 @@ class Agent:
 
         # Pass tensors and encoded action to train_step
         self.trainer.train_step(state_tensor, action_int, reward, next_state_tensor, game_over)
-
-    
 
     def encode_action(self, action):
         # Ensure 'action' is a Card object

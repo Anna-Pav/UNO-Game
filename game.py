@@ -49,10 +49,14 @@ class Game:
             self.deal_single_cards()
 
     def flip_first_card(self):
+        if not self.deck.cards:  # Check if the deck is empty
+            self.replenish_deck()  # Replenish the deck if needed
         while True:
-            if len(self.deck.cards) == 0:
-                self.replenish_deck()
-            first_card = self.deck.cards.pop(0) #draw facing card
+            if not self.deck.cards:  # Additional check to handle empty deck after replenishment
+                print("The deck is empty after replenishment, cannot continue the game.")
+                return
+            first_card = self.deck.cards.pop(0)  # Draw the facing card
+
             if first_card.color != "wild" and first_card.value.isdigit():
                 self.current_color = first_card.color
                 self.first_card = first_card
@@ -141,10 +145,9 @@ class Game:
             return random.choice(playable_cards)  # Randomly choose a playable card
         else:
             # No playable card, draw from the deck
-            if len(self.deck.cards) == 0:
-                self.replenish_deck()
-            drawn_card = self.deck.cards.pop()
-            if len(self.deck.cards) > 0:
+            if not self.deck.cards:  # Check if the deck is empty
+                self.replenish_deck()  # Replenish the deck if needed
+            if self.deck.cards:  # Additional check to handle empty deck after replenishment
                 drawn_card = self.deck.cards.pop()
                 player_hand.append(drawn_card)
                 print(f"Player {player_num + 1} draws a card: {drawn_card}")
@@ -155,8 +158,8 @@ class Game:
                     print("Drawn card cannot be played. Turn ends.")
                     return None  # Turn ends if the drawn card is not playable
             else:
-                print("Deck is empty. Turn ends.")
-                return None  # Turn ends if the deck is empty
+                print("The deck is empty after replenishment, cannot continue the game.")
+                return None  # Game cannot continue if the deck is still empty after trying to replenish
 
 
     def get_state(self, player_num):
@@ -191,4 +194,15 @@ class Game:
             player_num = self.get_next_player(player_num)
 
         print("Game over.")
+
+    def reset_game(self):
+        self.deck = Deck()  # Reinitialize the deck
+        random.shuffle(self.deck.cards)  # Shuffle the deck
+        self.players_hand = [[] for _ in range(self.num_players)]  # Reset each player's hand
+        self.discard_pile = []  # Reset the discard pile
+        self.current_color = None  # Reset the current color
+        self.skip_turn = False  # Reset the skip turn flag
+        self.direction = 1  # Reset the direction of play
+        self.current_player = 0  # Start with the first player again
+
 

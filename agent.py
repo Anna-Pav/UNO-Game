@@ -263,5 +263,21 @@ class Agent:
         game_state = self.game.get_state(player_num)
         tensor_state = self.convert_game_state_to_tensor(game_state)
 
+    def reset_state(self):
+        self.memory.clear()  # Clear the memory deque
+        # Do not reset self.epsilon here if you want the decayed value to carry over across games
+        self.win_count = 0  # Reset win count for the new set of games
+        self.wins_over_time.clear()  # Clear the history of wins over time
+        self.rewards_over_time.clear()  # Clear the history of rewards over time
+    
+    def adjust_epsilon(self):
+        # Decrease epsilon after each game, to a minimum value
+        if self.epsilon > 0.01:  # Set a minimum value to ensure some level of exploration
+            self.epsilon *= 0.995  # Adjust the decay rate as needed
+        else:
+            self.epsilon = 0.01  # Ensure epsilon does not go below the minimum value
+
+
+
 
         

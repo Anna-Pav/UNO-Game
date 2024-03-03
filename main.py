@@ -23,14 +23,18 @@ def plot_results(agent):
 
 if __name__ == "__main__":
     num_players = 4  # Including the AI agent
-    total_games = 100  # Set the total number of games you want the agent to play
+    total_games = 1000  # Set the total number of games you want the agent to play
+    game = Game(num_players)
+    agent = Agent(game)  # Initialize your AI agent here
 
     for game_index in range(total_games):  # Loop over the total number of games
-        game = Game(num_players)
+        game.reset_game()  # Reset the game state for a new game
+        agent.reset_state()  # Reset the agent's state for a new game
+
         game.deal_all_cards()  # Initially deal 7 cards to each player
         game.flip_first_card()  # Flip the first card to start the game
 
-        agent = Agent(game)  # Initialize your AI agent here
+        
         agent_player_num = 0  # Assuming the agent is the first player
 
         while True:  # Game loop
@@ -84,6 +88,9 @@ if __name__ == "__main__":
 
         # After the game ends, train the agent with experiences stored in long-term memory
         agent.train_long_memory()
+
+        # Adjust the agent's epsilon value to balance exploration and exploitation
+        agent.adjust_epsilon()
 
     # Plot the results after training
     plot_results(agent)

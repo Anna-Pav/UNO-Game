@@ -73,11 +73,10 @@ class Agent:
     
     # Update these lists in your training loop or after each game
     def update_metrics(self, reward, game_over):
-        if game_over:
-            self.wins_over_time.append(self.win_count)
-            self.rewards_over_time.append(reward)
-            if reward > 0:  # Assuming a positive reward indicates a win
-                self.win_count += 1
+        self.rewards_over_time.append(reward)  # This records the reward after each game
+        if game_over and reward > 0:  # Assuming a positive reward indicates a win
+            self.win_count += 1  # This increments the win count only if the agent has won
+            self.wins_over_time.append(self.win_count)  # This should record the cumulative wins over time
 
     def remember(self, state, action, reward, next_state, game_over):
         self.memory.append((state, action, reward, next_state, game_over))

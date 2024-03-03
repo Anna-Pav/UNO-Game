@@ -14,6 +14,7 @@ class Game:
         self.skip_turn = False  # Flag to indicate when a player's turn is skipped
         self.direction = 1 # direction of play - 1:clockwise, -1=anticlockwise 
         self.current_player = 0  # Start with the first player
+        self.current_winner = None  # Add this to track the winner
 
     def replenish_deck(self):
         if self.discard_pile:
@@ -102,6 +103,7 @@ class Game:
             # Check for game over condition
             if not player_hand:
                 game_over = True
+                self.current_winner = player_num
                 print(f"Player {player_num + 1} has won the game!")
 
         else:
@@ -204,5 +206,6 @@ class Game:
         self.skip_turn = False  # Reset the skip turn flag
         self.direction = 1  # Reset the direction of play
         self.current_player = 0  # Start with the first player again
+        self.current_winner = None  # Reset winner
 
 

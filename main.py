@@ -92,5 +92,9 @@ if __name__ == "__main__":
         # Adjust the agent's epsilon value to balance exploration and exploitation
         agent.adjust_epsilon()
 
+        # Assuming the reward is 1 for a win and 0 otherwise
+        reward = 1 if agent_player_num == game.current_winner else 0
+        agent.update_metrics(reward, game_over)  # Make sure to update the agent's metrics
+
     # Plot the results after training
     plot_results(agent)
